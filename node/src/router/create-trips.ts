@@ -2,12 +2,14 @@ import { FastifyInstance } from "fastify";
 import prisma from "../lib/prisma";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
-import { getMailClient } from '../lib/mail';
 import nodemailer from 'nodemailer';
-import { FormatDate } from "../lib/formatDate";
+import FormatDate from "../lib/formatDate";
+import getMailClient from "../lib/mail";
 
 export const trip = async (app: FastifyInstance) => {
-  app.withTypeProvider<ZodTypeProvider>().post('/', 
+  app
+  .withTypeProvider<ZodTypeProvider>()
+  .post('/', 
   {
     schema: 
     {
@@ -44,24 +46,24 @@ export const trip = async (app: FastifyInstance) => {
           ends_at,
           starts_at,
           is_confirmed: true,
-          Participant: 
-          {
-            createMany:
+          participant: 
             {
-              data: 
-              [
+              createMany:
                 {
-                  name,
-                  email,
-                  is_confirmed: true,
-                  is_owner: true
-                },
-                ...emails_to_invite.map(email => {
-                  return { email }
-                })
-              ]
+                  data: 
+                    [
+                      {
+                        name,
+                        email,
+                        is_confirmed: true,
+                        is_owner: true
+                      },
+                      ...emails_to_invite.map(email => {
+                        return { email }
+                      })
+                    ]
+                }
             }
-          }
         }
       }
     )
@@ -72,30 +74,30 @@ export const trip = async (app: FastifyInstance) => {
 
     const message = await mail.sendMail({
       from: 
-      {
-        name: 'Equipe',
-        address: 'hello@gmail.com',
-      },
+        {
+          name: 'Equipe',
+          address: 'hello@gmail.com',
+        },
       to:
-      {
-        name: name,
-        address: email,
-      },
+        {
+          name: name,
+          address: email,
+        },
       subject: `Confirme sua viagem para ${destination} em ${FormatDate(starts_at,'d "de" MMMM')}.`,
       html: 
-      `
-        <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6;">
-          <p>Voce solicitou a criacao de uma viagem para <strong>${destination}</strong> nas datas de <strong>${FormatDate(starts_at)}</strong> ate <strong>${FormatDate(ends_at)}</strong></p>
-          <p></p>
-          <p>Para confirmar sua viagem, clicque no link abaixo:</p>
-          <p></p>
-          <p>
-            <a href="${confirm}">Confirmar viagem</a>
-          </p>
-          <p></p>
-          <p>Caso voce nao saiba do que se trata esse e-mail, apenas ignore esse e-mail.</p>
-        </div>
-      `
+        `
+          <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6;">
+            <p>Voce solicitou a criacao de uma viagem para <strong>${destination}</strong> nas datas de <strong>${FormatDate(starts_at)}</strong> ate <strong>${FormatDate(ends_at)}</strong></p>
+            <p></p>
+            <p>Para confirmar sua viagem, clicque no link abaixo:</p>
+            <p></p>
+            <p>
+              <a href="${confirm}">Confirmar viagem</a>
+            </p>
+            <p></p>
+            <p>Caso voce nao saiba do que se trata esse e-mail, apenas ignore esse e-mail.</p>
+          </div>
+        `
     })
 
     console.log(nodemailer.getTestMessageUrl(message));

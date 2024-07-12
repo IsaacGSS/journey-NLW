@@ -4,7 +4,8 @@ import z from "zod";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 export async function getTrip(app: FastifyInstance) {
-  app.get('/', async (_, reply) => {
+  app
+  .get('/', async (_, reply) => {
     const destination = await prisma.trip.findMany()
 
     if(destination.length <= 0 || null || undefined) {
@@ -14,7 +15,9 @@ export async function getTrip(app: FastifyInstance) {
     return reply.status(200).send({ destination })
   })
 
-  app.withTypeProvider<ZodTypeProvider>().get('/:destination', {
+  app
+  .withTypeProvider<ZodTypeProvider>()
+  .get('/:destination', {
     schema: {
       params: z.object({
         destinationId: z.string().min(1).uuid()

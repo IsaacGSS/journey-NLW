@@ -1,7 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from 'date-fns/locale/pt-BR'
 
-export const FormatDate = (data: Date | string | undefined, schema?: string | undefined | null) => {
+const FormatDate = (data: Date | string | undefined, schema?: string | undefined | null) => {
 
   let Schema = schema
 
@@ -21,3 +21,5 @@ export const FormatDate = (data: Date | string | undefined, schema?: string | un
 
   return format(data, Schema, {locale: ptBR})
 }
+
+export default FormatDate
